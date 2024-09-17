@@ -1,5 +1,4 @@
-"use client";
-
+import Layout from "../layout";
 import { useEffect, useState } from "react";
 import type { Step1FormData, Step2FormData } from "@/types/formData";
 
@@ -35,39 +34,41 @@ export default function Summary() {
   }, []);
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      {!error && (
-        <div>
-          <h2>Summary of your information</h2>
-          <h3>Step 1: Personal Details</h3>
-          {step1Data ? (
-            <>
-              <p>
-                <strong>Name:</strong> {step1Data.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {step1Data.email}
-              </p>
-            </>
-          ) : (
-            <p>No data for Step 1</p>
-          )}
-          <h3>Step 2: Address Details</h3>
-          {step2Data ? (
-            <>
-              <p>
-                <strong>Address:</strong> {step2Data.address}
-              </p>
-              <p>
-                <strong>City:</strong> {step2Data.city}
-              </p>
-            </>
-          ) : (
-            <p>No data for Step 2</p>
-          )}
-        </div>
-      )}
-    </div>
+    <Layout>
+      <div>
+        {error && <p>{error}</p>}
+        {!error && (
+          <div>
+            <h2>Summary of your information</h2>
+            <h3>Step 1: Personal Details</h3>
+            {step1Data ? (
+              <>
+                <p>
+                  <strong>Name:</strong> {step1Data.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {step1Data.email}
+                </p>
+              </>
+            ) : (
+              <p>No data for Step 1</p>
+            )}
+            <h3>Step 2: Address Details</h3>
+            {step2Data ? (
+              <>
+                <p>
+                  <strong>Address:</strong> {step2Data.address}
+                </p>
+                <p>
+                  <strong>City:</strong> {step2Data.city}
+                </p>
+              </>
+            ) : (
+              <p>No data for Step 2</p>
+            )}
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 }

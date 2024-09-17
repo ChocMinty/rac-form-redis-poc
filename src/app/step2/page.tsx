@@ -1,5 +1,4 @@
-"use client";
-
+import Layout from "../layout";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Step2FormData } from "@/types/formData";
@@ -37,27 +36,31 @@ export default function Step2() {
   };
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      {!error && (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Address"
-            value={formData.address}
-            onChange={(e) =>
-              setFormData({ ...formData, address: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="City"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-          />
-          <button type="submit">Next</button>
-        </form>
-      )}
-    </div>
+    <Layout>
+      <div>
+        {error && <p>{error}</p>}
+        {!error && (
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Address"
+              value={formData.address}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={formData.city}
+              onChange={(e) =>
+                setFormData({ ...formData, city: e.target.value })
+              }
+            />
+            <button type="submit">Next</button>
+          </form>
+        )}
+      </div>
+    </Layout>
   );
 }
