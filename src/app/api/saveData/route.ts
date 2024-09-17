@@ -4,15 +4,16 @@ import {
   getSessionKeyFromCookie,
   setSessionKeyInCookie,
 } from "@/utils/session";
+import { Step1FormData, Step2FormData } from "@/types/formData";
 
 interface SaveDataRequest {
-  field1: string;
-  field2: string;
+  step: number;
+  formData: Step1FormData | Step2FormData;
 }
 
 export async function POST(request: Request) {
   const client = getRedisClient();
-  const formData: SaveDataRequest = await request.json();
+  const requestData: SaveDataRequest = await request.json();
 
   let sessionKey = getSessionKeyFromCookie();
   if (!sessionKey) {
@@ -21,7 +22,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    await client.set(sessionKey, JSON.stringify(formData), { EX: 3600 }); // Expiry set to 3600 sec (1 hour)
+    // Use HSET to set a field in the hash
+    await client.hSet(
+      sessionKey,
+      `step${requestData.step}`,
+      JSON.stringify(requestData.formData)
+    );
+
+    await client.expire(sessionKey, 3600); // 1 hour expiration
 
     return NextResponse.json({ success: true, key: sessionKey });
   } catch (err) {

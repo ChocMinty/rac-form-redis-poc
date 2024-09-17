@@ -2,40 +2,42 @@ import { NextResponse } from "next/server";
 import { getRedisClient } from "@/lib/redis";
 import { getSessionKeyFromCookie } from "@/utils/session";
 
-interface GetDataRequest {
-  key: string;
-}
-
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   const client = getRedisClient();
-  const { key }: GetDataRequest = await request.json();
-
-  // Use session key if no specific key is provided
-  const sessionKey = key || getSessionKeyFromCookie();
+  const sessionKey = getSessionKeyFromCookie();
 
   if (!sessionKey) {
-    return NextResponse.json({
-      success: false,
-      error: "Session key not found.",
-    });
+    return NextResponse.json({ error: "No session found" });
   }
 
-  try {
-    const data = await client.get(sessionKey);
+  const { searchParams } = new URL(request.url);
+  const step = searchParams.get("step");
 
-    if (data) {
-      return NextResponse.json({ success: true, data: JSON.parse(data) });
+  try {
+    if (step) {
+      // Retrieve specific field from the hash
+      const fieldData = await client.hGet(sessionKey, `step${step}`);
+
+      if (!fieldData) {
+        return NextResponse.json({ error: `No data found for step ${step}` });
+      }
+
+      return NextResponse.json({ [`step${step}`]: JSON.parse(fieldData) });
     } else {
-      return NextResponse.json({
-        success: false,
-        error: "Data not found or expired.",
-      });
+      // Retrieve all fields from the hash
+      const allData = await client.hGetAll(sessionKey);
+
+      // Parse JSON strings back into objects
+      const parsedData = Object.fromEntries(
+        Object.entries(allData).map(([key, value]) => [key, JSON.parse(value)])
+      );
+
+      return NextResponse.json(parsedData);
     }
   } catch (err) {
-    console.error("Error fetching data from Redis:", err);
+    console.error("Error retrieving data from Redis:", err);
     return NextResponse.json({
-      success: false,
-      error: "Error fetching data from Redis.",
+      error: "Error retrieving data from Redis.",
     });
   }
 }
