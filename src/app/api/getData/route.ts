@@ -1,33 +1,41 @@
 import { NextResponse } from "next/server";
 import { getRedisClient } from "@/lib/redis";
-import type { Step1FormData, Step2FormData } from "@/types/formData";
+import { getSessionKeyFromCookie } from "@/utils/session";
 
-interface GetDataResponse {
-  formData?: Step1FormData | Step2FormData;
-  error?: string;
+interface GetDataRequest {
+  key: string;
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const step = url.searchParams.get("step");
+export async function POST(request: Request) {
+  const client = getRedisClient();
+  const { key }: GetDataRequest = await request.json();
 
-  if (!step) {
-    return NextResponse.json(
-      { error: "Step parameter is missing" } as GetDataResponse,
-      { status: 400 }
-    );
+  // Use session key if no specific key is provided
+  const sessionKey = key || getSessionKeyFromCookie();
+
+  if (!sessionKey) {
+    return NextResponse.json({
+      success: false,
+      error: "Session key not found.",
+    });
   }
 
-  const client = getRedisClient();
-  const data = await client.get(`formData:step${step}`);
+  try {
+    const data = await client.get(sessionKey);
 
-  if (data) {
-    const formData = JSON.parse(data) as Step1FormData | Step2FormData;
-    return NextResponse.json({ formData } as GetDataResponse);
-  } else {
-    return NextResponse.json(
-      { error: "Session expired or data not found" } as GetDataResponse,
-      { status: 404 }
-    );
+    if (data) {
+      return NextResponse.json({ success: true, data: JSON.parse(data) });
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: "Data not found or expired.",
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching data from Redis:", err);
+    return NextResponse.json({
+      success: false,
+      error: "Error fetching data from Redis.",
+    });
   }
 }

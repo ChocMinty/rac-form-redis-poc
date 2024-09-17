@@ -10,7 +10,11 @@ export default function Summary() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const step1Res = await fetch("/api/getData?step=1");
+        const step1Res = await fetch("/api/getData", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ step: 1 }),
+        });
         const step1Data = await step1Res.json();
         if (step1Data.error) {
           setError(step1Data.error);
@@ -18,7 +22,11 @@ export default function Summary() {
           setStep1Data(step1Data.formData as Step1FormData);
         }
 
-        const step2Res = await fetch("/api/getData?step=2");
+        const step2Res = await fetch("/api/getData", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ step: 2 }),
+        });
         const step2Data = await step2Res.json();
         if (step2Data.error) {
           setError(step2Data.error);

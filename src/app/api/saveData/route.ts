@@ -1,19 +1,34 @@
-// app/api/saveData/route.ts
-
 import { NextResponse } from "next/server";
-import { getRedisClient } from "@/lib/redis";
-import type { Step1FormData, Step2FormData } from "@/types/formData";
+import { generateUniqueKey, getRedisClient } from "@/lib/redis";
+import {
+  getSessionKeyFromCookie,
+  setSessionKeyInCookie,
+} from "@/utils/session";
 
 interface SaveDataRequest {
-  step: number;
-  formData: Step1FormData | Step2FormData;
+  field1: string;
+  field2: string;
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const client = getRedisClient();
-  const { step, formData }: SaveDataRequest = await req.json();
+  const formData: SaveDataRequest = await request.json();
 
-  await client.set(`formData:step${step}`, JSON.stringify(formData));
+  let sessionKey = getSessionKeyFromCookie();
+  if (!sessionKey) {
+    sessionKey = generateUniqueKey();
+    setSessionKeyInCookie(sessionKey);
+  }
 
-  return NextResponse.json({ status: "success" });
+  try {
+    await client.set(sessionKey, JSON.stringify(formData), { EX: 3600 }); // Expiry set to 3600 sec (1 hour)
+
+    return NextResponse.json({ success: true, key: sessionKey });
+  } catch (err) {
+    console.error("Error saving data to Redis:", err);
+    return NextResponse.json({
+      success: false,
+      error: "Error saving data to Redis.",
+    });
+  }
 }
