@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { generateUniqueKey, getRedisClient } from "@/lib/redis";
-import {
-  getSessionKeyFromCookie,
-  setSessionKeyInCookie,
-} from "@/utils/session";
+import { getRedisClient } from "@/lib/redis";
+import { getSessionKeyFromCookie } from "@/utils/session";
 import { Step1FormData, Step2FormData } from "@/types/formData";
+import { generateUniqueKey } from "@/utils/mockData";
 
 interface SaveDataRequest {
   step: number;
@@ -14,11 +12,13 @@ interface SaveDataRequest {
 export async function POST(request: Request) {
   const client = getRedisClient();
   const requestData: SaveDataRequest = await request.json();
+  let isNewKey = false;
 
   let sessionKey = getSessionKeyFromCookie();
   if (!sessionKey) {
     sessionKey = generateUniqueKey();
-    setSessionKeyInCookie(sessionKey);
+    isNewKey = true;
+    console.log("No session key found, generating new key:", sessionKey);
   }
 
   try {
@@ -34,9 +34,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, key: sessionKey });
   } catch (err) {
     console.error("Error saving data to Redis:", err);
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: false,
       error: "Error saving data to Redis.",
     });
+    isNewKey &&
+      response.headers.set(
+        "Set-Cookie",
+        `sessionKey=${encodeURIComponent(
+          sessionKey
+        )}; Path=/; HttpOnly=false; Secure; SameSite=Strict`
+      );
+
+    return response;
   }
 }

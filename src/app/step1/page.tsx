@@ -9,7 +9,7 @@ export default function Step1() {
     name: "",
     email: "",
   });
-  const [error, setError] = useState<string>("");
+  const [error] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function Step1() {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          setError(data.error);
+          console.log("Error getting cache data:", data.error);
         } else if (data.formData) {
           setFormData(data.formData as Step1FormData);
         }
@@ -41,21 +41,29 @@ export default function Step1() {
       {error && <p>{error}</p>}
       {!error && (
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-          />
-          <button type="submit">Next</button>
+          <div>
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <button type="submit">Next</button>
+          </div>
         </form>
       )}
     </div>
