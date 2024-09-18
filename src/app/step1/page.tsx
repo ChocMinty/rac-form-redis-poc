@@ -9,19 +9,26 @@ export default function Step1() {
     name: "",
     email: "",
   });
-  const [error] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/getData?step=1")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/getData?step=1");
+        const data = await response.json();
+
         if (data.error) {
           console.log("Error getting cache data:", data.error);
-        } else if (data.formData) {
+        } else {
           setFormData(data.formData as Step1FormData);
         }
-      });
+      } catch (error) {
+        setError("Failed to load data for step 1");
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

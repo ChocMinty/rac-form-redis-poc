@@ -14,15 +14,22 @@ export default function Step2() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/getData?step=2")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/getData?step=2");
+        const data = await response.json();
+
         if (data.error) {
-          setError(data.error);
-        } else if (data.formData) {
+          console.log("Error getting cache data:", data.error);
+        } else {
           setFormData(data.formData as Step2FormData);
         }
-      });
+      } catch (error) {
+        setError("Failed to load data for step 2");
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
