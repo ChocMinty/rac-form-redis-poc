@@ -9,16 +9,16 @@ export default function Step1() {
     name: "",
     email: "",
   });
-  const [error, setError] = useState<string>("");
+  const [error] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
     fetch("/api/getData?step=1")
       .then((res) => res.json())
       .then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else if (data.formData) {
+        if (!data.error) {
+          //setError(data.error);
+       // } else if (data.formData) {
           setFormData(data.formData as Step1FormData);
         }
       });
@@ -41,12 +41,15 @@ export default function Step1() {
       {error && <p>{error}</p>}
       {!error && (
         <form onSubmit={handleSubmit}>
+          <div>
           <input
             type="text"
             placeholder="Name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
+          </div>
+          <div>
           <input
             type="email"
             placeholder="Email"
@@ -55,7 +58,10 @@ export default function Step1() {
               setFormData({ ...formData, email: e.target.value })
             }
           />
+          </div>
+          <div>
           <button type="submit">Next</button>
+          </div>
         </form>
       )}
     </div>

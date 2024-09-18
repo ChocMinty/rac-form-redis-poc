@@ -1,3 +1,5 @@
+'use client';
+
 import Layout from "../layout";
 import { useEffect, useState } from "react";
 import type { Step1FormData, Step2FormData } from "@/types/formData";
