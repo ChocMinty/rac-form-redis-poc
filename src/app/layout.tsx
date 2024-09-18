@@ -6,11 +6,6 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export const metadata = {
-  title: "Multi-step Form",
-  description: "A multi-step form application",
-};
-
 export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
